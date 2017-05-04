@@ -252,24 +252,25 @@ The biggest limitation of ASCII is that there is a language limitation
 
 ## MIPS Assembly Language ##
 * References: CO&D chapter 2 instructions: Language of the Compiler
- /~cs241/mips
 
-High Level Languages:
- - C++, Racket, Python
- - Meant to make it as conveniently as possible to read code
- - meant to be process independent, where it will compile appropriately for each machine
-Assembly Language:
- - MIPs, ARMv7
- - compromise between `HLL` and `MC`
- - one statement in `AL` means to one statement in `MC`
- - can run assembly on multiple processors by using a simulator
- - used for device drivers like hard-drive driver, cdRom driver
-Machine Code:
- - sequence of 0s and 1s
- - meant to be executed by computer
- - uses 0, 1s to make it as convenient for computers as possible
- - processor dependent, meant to be convenient to a specific computer
- - also called machine language
+Link: <a src="https://www.student.cs.uwaterloo.ca/~cs241/mips/mipsasm.html"> MIPS Tutorial </a>
+
+* High Level Languages:
+     - C++, Racket, Python
+     - Meant to make it as conveniently as possible to read code
+     - meant to be process independent, where it will compile appropriately for each machine
+* Assembly Language:
+     - MIPs, ARMv7
+     - compromise between `HLL` and `MC`
+     - one statement in `AL` means to one statement in `MC`
+     - can run assembly on multiple processors by using a simulator
+    - used for device drivers like hard-drive driver, cdRom driver
+* Machine Code:
+     - sequence of 0s and 1s
+     - meant to be executed by computer
+     - uses 0, 1s to make it as convenient for computers as possible
+     - processor dependent, meant to be convenient to a specific computer
+     - also called machine language
 
 > Just like in numbers, we leave a comma after ever 3 digits, we will add a space between every 4 bits
 
