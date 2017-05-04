@@ -168,12 +168,7 @@ Program called xxd:
 `you never know what a byte means in a file if you don't know what the file is`
   
 ## CPU ##
-```{r, echo=FALSE}
-# Define variable containing url
-url <- "https://imgur.com/MC4yMA6"
-```
-<center><img src="`r url`"></center>
-
+<img src="http://www.it4nextgen.com/wp-content/uploads/2017/01/cpu-block-diagram.png">
 
 * CU - Control Unit
 * ALU - Arithmetic-Logic Unit
