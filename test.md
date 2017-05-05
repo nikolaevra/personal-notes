@@ -298,9 +298,66 @@ jr $31         // return result destination
 
 Assembly language is one statement per line
 
-## What is Machine Code? ##
-- Binary code
-- Directly executed by processor
+## MIPS language ##
+
+* Design Principle 1:
+    - Simplicity favors regularity   
+* Design Principle 2:
+    - Smaller is faster
+
+> Arithmetic operations my occur on the registers, that's why in MIPS you must include instructions to transfer 
+> date between memory and registers. Those operations are called data transfer instructions
+
+* To access a word in memory, you must supply the memory address, which is just like a long one dimensional array
+    - Memory's locations start with 1 and go on until you run out of memory
+    - The operation of getting something from memory is called **load**
+
+> Example: Compiling an assignment when an operand is in memory. Assume characters g, h are in `$s1` and `$s2` respectively
+> and the starting address of the array is in `$s3`.
+ 
+C code:
+```
+ g = h + A[8];
+``` 
+MIPS code:
+```
+ # We know that one of the operands is in memory and we have to load it.
+ lw $t0,32($s3)       # Temporary reg $t0 gets A[8]
+ # we entered 32 above and not 8, because we have 8 * 4 = 32
+ add $s1,$s2,$t0     # g = h + A[8]
+```
+
+> In MIPS, words must start at address that is multiples of 4. This requirement is called *alignment restriction*.
+> Meaning that data has to be aligned in memory on natural boundaries
+
+*So apparently, alignment restriction allows for faster data transfers.... maybe something related to the channel of transfer?*
+
+What if we want to write into memory now?
+
+C code:
+```
+A[12] = h + A[8]
+```
+MIPS code:
+```
+lw $t0,32($s3)       # Temporary reg $t0 gets A[8]
+add $t0,$s2,$t0      # Temporary reg $t0 gets h + A[8]
+
+# now we have to save this ting (it's all habibis ting)
+sw $t0,48($s3)       # storing result of calculation in A[48] (4*12 = 48)
+```
+
+Often, programs have more variables than computer has registers in that case, the compiler tries to store most frequently used
+variables in registers and the rest in the memory.
+
+* Constant or immediate operands
+
+> Example: Add the constant 4 to register $s3
+```
+lw $t0, AddrConstant4($s1)   # $t0 = constant 4
+add $s3,$s3,$t0              # $s3 = $s3 + $t0 ($t0 == 4)
+```
+
 
 
 
