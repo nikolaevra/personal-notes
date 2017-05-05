@@ -6,7 +6,6 @@ He will assign a pre-lecture reading to students to be more productive in class
 
 
 # CS 241 #
-==========
 
 You have 3 release tokens, each token has 12 hours cool down
 
