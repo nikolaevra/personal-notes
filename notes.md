@@ -1,13 +1,14 @@
-There are slides to the course that the prof used to use a lot before
-however this time he is not going to use the slides in the class anymore, 
-he will do more blackboard stuff explaining everything on the board
+There are slides to the course that the prof used to use a lot before. However, this time he is not 
+going to use the slides in the class anymore, he will do more blackboard stuff explaining everything 
+on the board
 
 He will assign a pre-lecture reading to students to be more productive in class
 
 
----------------------------------------CS 241-----------------------------------
+# CS 241 #
+==========
 
-You have 3 release tokens, each token has 12 hours cooldown
+You have 3 release tokens, each token has 12 hours cool down
 
 Assignments:
         25%
@@ -35,16 +36,13 @@ This week's tutorial is a review of C++
 
 * What is a computer? (to learn more, take CS250)
     - CPU
-        - Control Unit // brain of the CPU
-        - ALU Arithmetic / Logic Unit // the thing that knows how to add numbers
-        and compute boolean logic
-        - Memory Unit // talks to the RAM
-        - Registers // very fast, very little memory
-        // we will use registers to write machine code
-        // just a much of transistors
+        - Control Unit `brain of the CPU`
+        - ALU Arithmetic-Logic Unit `the thing that knows how to add numbers and compute boolean logic`
+        - Memory Unit `talks to the RAM`
+        - Registers `very fast, very little memory we will use registers to write machine code just a much of transistors`
         - Magic Smoke
     - RAM
-        - Just a bynch of bytes
+        - Just a bunch of bytes
 
 * What is a compiler?
     - Input (C++ )
@@ -70,7 +68,7 @@ This week's tutorial is a review of C++
             - Still need linker to use multiple files
         - Output (Machine Code)
             - program written in Machine code
-        `// If all goes right, the output/input is the same program or atleast behaves the same way`
+        `If all goes right, the output/input is the same program or atleast behaves the same way`
 
 * What is Machine Language?
     - von Neumann Architecture
@@ -85,19 +83,19 @@ This week's tutorial is a review of C++
         - byte is 8 bits
         - nibble is 4 bits
 
-* What does 0110 1010 mean?
-    - it could be ab 8bit integer 64 + 31 + 8 + 2 = 106
-* What does 1111 0001 mean?
-    - means 128 + 64 + 32 + 16 + 1 = 241
+* What does `0110 1010` mean?
+    - it could be ab 8bit integer `64 + 31 + 8 + 2 = 106`
+* What does `1111 0001` mean?
+    - means `128 + 64 + 32 + 16 + 1 = 241`
 
 * How do we deal with negatives in binary?
-    - In binary -42 => does not equal to -0010 1010
-    we have to use a bit to represent the negativity so isntead of using 8 bits
+    - In binary -42 => does not equal to `-0010 1010`
+    we have to use a bit to represent the negativity so instead of using 8 bits
     to represent a number, we use 7 bits and the leading number represents
     negativity
-    - (1)010 1010 // in this case the first 1 represent minues
+    - `(1)010 1010` // in this case the first 1 represent minus
     - this is called signed magnitude method
-    - so for 32 bit number 31 bits is a number and 1 bit is magnitude
+    - so for 32-bit number 31 bits is a number and 1 bit is magnitude
 
 **One's Compliment**: (meaning that you change ones to ones compliments, which is 0)
 ```
@@ -119,7 +117,7 @@ But now since we flipped everything, it looks more like this:
 So if we have `-2 + 3` we move from `-2 -> -1 -> -0 -> 0 -> 1` // we need 4 steps to get 1
 // which is a problem because because we still can't use the same hardware
 
-Two's Compliment:
+**Two's Compliment:**
 You flip all of the bits, but also add 1 to the magnitude
 ```
  0                                                                       255
@@ -137,6 +135,10 @@ negativity, which is a lot of work
 - instead, we start from the end and keep all of the 0s and the first 1 the same
 and flip everything  after that
 - so `1100 1000 => 0011 1000`
+
+<a src="https://youtu.be/lKTsv6iVxV4">
+Here is a video that will explain this all signed/unsigned business in greater detail
+</a>
 
 ## Characters ##
 
@@ -304,6 +306,8 @@ Assembly language is one statement per line
     - Simplicity favors regularity   
 * Design Principle 2:
     - Smaller is faster
+* Design Principle 3:
+    - Make the common case fast
 
 > Arithmetic operations my occur on the registers, that's why in MIPS you must include instructions to transfer 
 > date between memory and registers. Those operations are called data transfer instructions
@@ -356,6 +360,12 @@ variables in registers and the rest in the memory.
 ```
 lw $t0, AddrConstant4($s1)   # $t0 = constant 4
 add $s3,$s3,$t0              # $s3 = $s3 + $t0 ($t0 == 4)
+```
+> Note: here we are assuming that our constant is already loaded into memory
+
+Another approach could be using `addi` command, which stands for immediately add
+```
+addi $s3,$s3,4     # $s3 = $s3 + 4
 ```
 
 
