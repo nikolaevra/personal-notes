@@ -308,7 +308,7 @@ Assembly language is one statement per line
 * Design Principle 3:
     - Make the common case fast
 * Design Principle 4:
-    - Make design demands good compromises
+    - Good design demands good compromises
 
 > Arithmetic operations my occur on the registers, that's why in MIPS you must include instructions to transfer 
 > date between memory and registers. Those operations are called data transfer instructions
