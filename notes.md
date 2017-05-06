@@ -307,6 +307,8 @@ Assembly language is one statement per line
     - Smaller is faster
 * Design Principle 3:
     - Make the common case fast
+* Design Principle 4:
+    - Make design demands good compromises
 
 > Arithmetic operations my occur on the registers, that's why in MIPS you must include instructions to transfer 
 > date between memory and registers. Those operations are called data transfer instructions
@@ -368,9 +370,156 @@ addi $s3,$s3,4     # $s3 = $s3 + 4
 ```
 
 
+### Translating MIPS into machine code ###
+* Since registers re referred by almost all instruction there must be a convention to map those registers to numbers
+    - registers `$s0 - $s7` map onto registers `16 - 23`
+    - registers `$t0 - $t7` map onto registers `8 - 15`
+    
+Example:
+```
+add $t0,$s1,$s2
+```
+Now we convert to binary MIPS representation
+```
+0000 0010 0011 0010 0100 0000 0010 0000 
+```
+| 6-bits  | 5-bits | 5-bits | 5-bits | 5-bits | 6-bits |
+|:-------:|:------:|:------:|:------:|:------:|:------:|
+| 000000  | 10001  | 10010  | 01000  | 00000  | 100000 |
+| Tells MIPS that this is an addition operation | Denotes the # of register `$s1 = 17 = 10001`, which is the first source operand | Denotes the # of register `$s2 = 18 = 10010`, which is the second source operand | Denotes the # of register `$t0 = 8 = 01000`, which receives the result | Unused in this instruction, so its set to 0 | Tells MIPS that this is an addition operation |
 
+> Note that the size of the instruction is exactly 32-bit long, which is caused by the length of the word
 
+! **WARNING:** Entering territory of mind blowery !
+ > Since we do not want to write these long strings of 0s and 1s, we are going to use HEX instead. Hex works nicely in computers because each group of 4-bit binary digits can be easily encoded in a 16-bit hex digit
 
+MIPS fields are given names to make them easier to read and stuff:
 
+| 6-bits  | 5-bits | 5-bits | 5-bits | 5-bits | 6-bits |
+|:-------:|:------:|:------:|:------:|:------:|:------:|
+| 000000  | 10001  | 10010  | 01000  | 00000  | 100000 |
+| op - basic operation of the instruction (opcode) | rs - the first register source operand | rt - the second register source operand | rd - the register destination operand | shamt - shift amount (will be discussed later) | funct - function or function code. Selects the specific variant of the operation in the op field |
+
+We have a problem here though. Sometimes we want to have longer operations because we have to use larger numbers then 32.
+> For example: the load word instruction must specify 2 registers and a constant. Since we are constrained to a 5-bit value, we can only load a value up to 32. The constant is used to select elements from arrats or data structures, which means we will often need values more then 32.
+
+This is where the Design principle #4 kicks in:
+*(Good Design demands good compromises)*
+
+The solution was to make all instructions the same length, but require different kinds of instruction formats for different kinds of instructions
+
+> For example: the format we discussed before is called R-type, but there is also I-type. The fields of the I-type are:
+
+| 6-bits  | 5-bits | 5-bits | 16-bits |
+|:-------:|:------:|:------:|:------:|
+| op | rs | rt | constant or address |
+
+I-type command in MIPS will now look like this:
+```
+lw $t0,1200($s3)         ; Temporary reg $t0 gets A[300]
+; Note how we are using 1200 to get arr value of 300, because remember memory alignment restriction?
+```
+<a scr="https://en.wikipedia.org/wiki/Data_structure_alignment">if not, check this link out to learn more about alignment restriction </a>
+
+And the same command in machine code will look like this:
+```
+1000 1101 0010 1000 0000 0100 1011 0000
+```
+
+### Logical Operations ###
+Logical operations include operations such as shift left `sll`, shift right `srl`, bit-by-bit AND `and, andi`, bit-by-bit OR `or, ori`, bit-by-bit NOT `nor`.
+
+**Shift left example:**
+```
+0000 0000 0000 0000 0000 0000 0000 1001 = 9 
+; after calling sll command, we get
+0000 0000 0000 0000 0000 0000 1001 0000 = 144 
+```
+
+> Another example
+```
+sll $t2,$s2,4     # reg $t2 = reg $s0 << 4 bits
+# so we are shifting value from $t2 into $s2 and we are shifting it by 4 bits
+# we can easily calculate the new value because shifting by 4 bits tot he left is like myltiplying by 2^4 (or 16)
+```
+
+Also, we can now define what `shamt` stands for in our machine functions field. It means the shift amount
+
+**And example:**
+```
+register $t2 = 0000 0000 0000 0000 0000 1101 1100 0000
+register $t1 = 0000 0000 0000 0000 0011 1100 0000 0000
+and $t0,$t1,$t2  # reg $t0 = reg $t1 & reg $t2
+register $t0 = 0000 0000 0000 0000 0000 1100 0000 0000
+```
+Look at it like its a table, if both registers have 1 => result will have 1 too at that binary location
+
+**Or example:**
+```
+register $t2 = 0000 0000 0000 0000 0000 1101 1100 0000
+register $t1 = 0000 0000 0000 0000 0011 1100 0000 0000
+or $t0,$t1,$t2  # reg $t0 = reg $t1 | reg $t2
+register $t0 = 0000 0000 0000 0000 0011 1101 1100 0000
+```
+
+**Not Example**
+```
+register $t2 = 0000 0000 0000 0000 0000 0000 0000 0000
+register $t1 = 0000 0000 0000 0000 0011 1100 0000 0000
+nor $t0,$t1,$t2  # reg $t0 = ~ (reg $t1 | reg $t3)
+register $t0 = 1111 1111 1111 1111 1100 0011 1111 1111
+```
+
+### Instruction for making decisions ###
+**beq example**
+```
+beq register1, regiter2, L1
+```
+means to go to the statement labeled L1 if the value in register1 equals the value in register2
+
+**bne example**
+```
+bne register1, regiter2, L1
+```
+means to go to the statement labeled L1 if the value in register1 does not equal the value in register2
+
+> Big Example boys:
+
+Lets say you want to rewrite this in MIPS:
+```
+if (i == j) {
+    f = g + h;
+} else {
+    f = g - h;
+}
+```
+
+Note: our code will be more efficient if we test for the opposite condition to branch over the code that performs the *then* part of the *if*.
+
+```
+bne $s3,$s4,Else # go to else if i != j
+add $s0,$s1,$s2  # f = g + h (skipped if i != j)
+j Exit # go to (jump) to Exit
+Else:sub $s0,$s1,$s2    # f = g - h (skipped i == j)
+Exit:
+```
+
+**LOOPS**
+```
+while (save[i] == k) {
+    i += 1;
+}
+```
+In MIPS: Assume that `i` and `k` corresponds to registers `$s3` and `$s5` and the base of the array save is in `$s6`
+```
+Loop: sll $t1,$s3,2    # Temp reg $t1 = i * 4. Remember how shifting left multiplies, in our case it multiplies by 4, 
+                       # which is what we need to traverse array, since we have to remember about alignment problem
+    add $t1,$t1,$s6    # $t1 = address of save[i]
+    lw $t0,0($t1)      # temp reg $t0 = save[i]
+    bne $t0,$s5,Exit   # go to exit if save[i]!=k
+    addi $s3,$s3,1     # i = i + 1
+    j Loop             # go to Loop
+Exit:
+```
 
 
