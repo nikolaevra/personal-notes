@@ -518,8 +518,99 @@ Loop: sll $t1,$s3,2    # Temp reg $t1 = i * 4. Remember how shifting left multip
     lw $t0,0($t1)      # temp reg $t0 = save[i]
     bne $t0,$s5,Exit   # go to exit if save[i]!=k
     addi $s3,$s3,1     # i = i + 1
-    j Loop             # go to Loop
+    jr Loop             # go to Loop
 Exit:
 ```
+## Lecture 3: Assembly language ##
+Going over the MIPS reference sheet:
+<a src="https://www.student.cs.uwaterloo.ca/~cs241/mips/mipsref.pdf">MIPS reference sheet</a> 
 
+> Note: in branching commands, the `pc` is incremented before the equality comparison is completed, so that by the time 
+> the comparison is done, we already have a complete incremented `pc`
+
+In many commands, the destination comes first and then teh two variables which are used to perform the operation. 
+This is done so that we have a similar order as in the regular notation `x = y + z` where destination is first and the 
+two variables come after
+
+* Review:
+    * Our MIPS has 18 instructions:
+    * CPU contains 32 `32-bit` registers
+    * `cs241.wordasm` is used to create binary files
+    * `mips.twopoints` to start MIPS machine
+    
+* Special purpose registers:
+    * `$0` - read only register contains the value 0 always. Very useful for `beq` and `bne` commands. Very useful for a copy instruction, we can just `add $3, $7, $0`. This way we put the value of register `$7` into register `$3`
+    * `$30` - Stores the end of your memory. You can also use it as stack because you `started from the bottom` and go `all the way up`
+    * `$31` - stores the return address
+    * `$29` - is also special, but we will cover it later
+
+> Question: `Can we translate directly from assembly to hex? Or do we go to binary first and then to hex?`
+
+> Example: `add 2 numbers and put them into register 9`
+```
+add $9, $5, $7 ; = 0000 0000 1010 0111 0100 1000 0010 0000 = 0x00a74820 // note, you dont have to include the 0s between 0x and a
+jr $31         ; = 0x03e00008
+```
+> Note: `Leading 0s between 0x and first any non-zero values can be ignored and they don't change the actual value`
+
+> Example: `Get value from register $1 and put it's absolute value in register $3`
+```
+; $1 - x
+; $3 - |x|
+; $4 - flag
+; Good style to document things
+
+add $3,$1,$0  ; moving to $3 is purely for convenience
+slt $4,$3,$0
+beq $4,$0,1
+sub $3,$0,$3
+jr $31
+```
+
+The logic could have been done with `Labels`.
+```
+; $1 - x
+; $3 - |x|
+; $4 - flag
+; Good style to document things
+
+add $3,$1,$0  ; moving to $3 is purely for convenience
+slt $4,$3,$0
+beq $4,$0,return
+sub $3,$0,$3
+return:
+jr $31
+```
+> Question: `Can we use labels when encoding into hex?`
+
+> Answer: `No, we can't usually when we use assembler it does the work for us of changing labels into the address of the 
+next instruction after the label`
+
+> Note: `Labels are litt fam!`
+
+> Error notes: `Unaligned access- memory reads have to be aligned, and unaligned access means that its trying to read something that is not divisible by 4`
+
+The thing with branching, is you never want to branch by `-1`, that will make an infinite loop
+
+Lets make a loop now:
+> Example: `Add numbers 1 through 13 and put it into register $3`
+```
+; $1 == 1
+; $2 == i
+; $3 : return value
+
+lis $1
+.word 1
+lis $2
+.word 13
+add $3,$0,$0 ; we can't assume that registers are initialized. 
+             ; In our env. it will work, but in others, it might not
+loop:
+    beq $2,$0,end
+    add $3,$3,$2
+    sub $2, $2, $1
+    beq $0,$0,loop
+end:
+    jr $31
+```
 
