@@ -614,3 +614,254 @@ end:
     jr $31
 ```
 
+## Lecture 4 ##
+
+> Example: `Puts the sum of the integers between $1 and $2 into $3`
+
+```
+; $1 - start
+; $2 - end
+; $3 - sum
+; $4 - i
+; $5 - flag
+; $6 - 1
+; $7 - &top
+; $8 - &end
+
+;; init
+    add $3, $0, $0 ; sum = 0
+    add $4, $1, $0 ; i = start
+    lis $6
+    .word 1
+    lis $7
+    .word top
+    lis $8
+    .word end
+;; test
+top:
+    slt $5, $2, $4 ; $5 -> end < i
+    bne $5, $0. end
+    add $3,$3,$4
+    add $4,$4,$6
+    beq $0,$0,top
+end:
+    jr $31
+```
+
+Talking about memory again:
+- We have RAM
+    - and a register `$30` pointing right at the end of the RAM
+    - our machine that we are using requires `word alignment`. Every word must be of length at least 4-bits and must be a multiple of 4 
+    
+> Basic Example: `Load a word into register $3 `
+```
+    lis $6
+    .word x       ; register $6 now has value -1
+    lw $3, 0($0)  ; what is the word at the very end of the RAM
+    jr $31
+    
+; There is another use for labels, you can use them as global variables
+
+x:  .word -1
+
+```
+The `mips.array`
+> Example: `Read array from user's input and sum it up into $3`
+```
+; $1 - beg of arr pointer
+; $2 - length of arr
+; $3 - sum 
+; $4 - 4
+; $5 - flag
+
+    add $3, $0, $0 ; good practice to intialize variables
+    lis $4
+    .word 4
+    multu $4, $2
+    mflo $2        ; now the length = 4 * length
+    add $2, $2, $1 ; adding the initial point of the array
+    ; this way we know the stopping memory location for our array
+top:
+    beq $1, $2, end
+    lw $5 0($1)
+    add $3, $3, $5
+    add $1, $1, $4
+    beq $0, $0, top
+end:    
+    jr $31
+```
+
+When a word is store to memory location 0xffff000c, the least significant byte will be printed to the screen
+
+> Example: `Print the array as ASCII to the screen`
+```
+; $1 - beg of arr pointer
+; $2 - length of arr
+; $4 - 4
+; $5 - temp
+; $6 - output address
+
+    lis $6
+    .word 0xffff000c
+    lis $4
+    .word 4
+    multu $4, $2
+    mflo $2        ; now the length = 4 * length
+    add $2, $2, $1 ; adding the initial point of the array
+    ; this way we know the stopping memory location for our array
+top:
+    beq $1, $2, end
+    lw $5 0($1)   ; $5 = *arr
+    sw $5, 0($6)  ; putchar($5)
+    add $1, $1, $4
+    beq $0, $0, top
+end:    
+    jr $31
+```
+
+> Example: `Read a character from user`
+```
+    lis $6
+    .word 0xffff0004
+    lw $3, 0($6)
+    jr $31
+```
+
+Making a function
+> Example: `Print a character`
+```
+    lis $5
+    .word print
+    sw $31, -4($30)
+    lis $31
+    .word 4
+    sub $30, $30, $31
+    
+    jalr $5
+    
+    lis $31
+    .word 4
+    add $30, $30, $31
+    lw 
+    
+    js $31
+
+Note: The example is not tested
+
+```
+
+## Lecture 5 ##
+
+Rules of stack usage:
+1) Do not talk about stack usage
+2) If you push, you pop `Otherwise you messup everyone else's offsets and stacks`
+3) Hands to yourself `Don't try to touch stack items put there by someone else`
+
+Always save `$31` before calling `jalr`
+You never have to save `$30` it will be always offset by anyone who uses it and put back into initial position
+
+> Example: `abs value function`
+```
+    lis $8
+    .word 8
+    sw $31, -4($30) ; storing $31
+    sw $8, -8($30) ; storing $8 for later use
+    sub $30, $30, $8
+    ;; pushing register $31 to the stack and moving stack pointer
+
+    lis $2
+    .word abs
+    jalr $2
+    
+    lw $8, 0($30)
+    lw $31, 4($30)
+    add $30, $30, $8
+     ;; decrememnt pointer on the stack
+
+abs:
+    add $3, $1, $0
+    slt $2, $3, $0
+    beq $0, $2, end
+    sub $3, $0, $3
+end:
+    jr $31
+```
+
+>Example: `Find factorial using a recursive function`
+```
+    sw $31, -4($30)           ; save return address
+    lis $2 
+    .word 4                   ; load 4 into $2
+    sub $30, $30, $2          ; offset stack pointer
+    lis $31 
+    .word fact                ; load pointer to function
+     
+    jalr $31                  ; call function
+    
+    lis $2                    ; cleanup
+    .word 4                   ; load 4 into $2
+    add $30, $30, $2          ; offset stack back
+    lw $31, -4($30)           ; load return address to $31
+    jr $31 ; return
+    
+fact:
+    ;; $1 - n
+    ;; $2 - value 1
+    ;; $3 - return value
+    sw $31, -4($30)           ; store register $31
+    sw $1, -8($30)            ; store register $1
+    sw $2, -12($30)           ; store register $2
+    lis $2
+    .word 12
+    sub $30, $30, $2          ; decrement stack pointer
+    lis $2
+    .word 1
+    add $3, $0, $2    
+        
+    ;; base case
+    beq $1, $0, factret
+    
+    ;; decrement n by 1
+    sub $1, $1, $2            ; decrement $1 = $1 - 1
+    
+    ;; get the pointer to fact label
+    lis $31                   ; could also put that into $2 or $3
+    .word fact
+    
+    jalr $31                  ; jump to fact label
+    
+    ;; executes after the factret 
+    lw $1, 4($30)
+    mult $1, $3
+    mflo $3                   ; $3 *= $1
+    
+factret:
+    lis $2
+    .word 12
+    add $30, $30, $2          ; increment stack pointer
+    lw $31, -4($30)           ; restore register $31
+    lw $1, -8($30)            ; restore register $1
+    lw $2, -12($30)           ; restore register $2
+    jr $31
+```
+
+Things you will need for assignment 3:
+- Assembler translates assembly language into machine language
+- Everything fairly simple because you can go line by line and convert instructions
+    - But the Labels are tricky because you have to figure out labels first, before running the program
+- We input: text and output: binary
+    - In between we have:
+        - Scanner: returns tokens for all inputs
+            - `Q:` Why do we need scanners? why can't we translate tokens straight into binary line by line?
+            - `A:` We can't do that because of Labels
+        - Symbol Table (S.T.)
+        - Code generation: returns machine code from converted tokens
+- We also have to consider the `syntax` and `semantics`
+    - Syntax: How we say something -> There is only one way to write add command
+    - Semantics: What it means -> You take one register value and add it to another register and save result somewhere
+    
+
+    
+    
+    
+
