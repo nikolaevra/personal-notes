@@ -851,7 +851,7 @@ Things you will need for assignment 3:
     - But the Labels are tricky because you have to figure out labels first, before running the program
 - We input: text and output: binary
     - In between we have:
-        - Scanner: returns tokens for all inputs
+        - Scanner: returns tokens for all inputs (We will be a scanner for A3, A4)
             - `Q:` Why do we need scanners? why can't we translate tokens straight into binary line by line?
             - `A:` We can't do that because of Labels
         - Symbol Table (S.T.)
@@ -860,8 +860,33 @@ Things you will need for assignment 3:
     - Syntax: How we say something -> There is only one way to write add command
     - Semantics: What it means -> You take one register value and add it to another register and save result somewhere
     
+## Lecture 6 ##
 
-    
-    
+Continuing on Assembler. We are talking about what we do after the scanner returns us tokens.
+
+- Analysis (First pass):
+    - Output:
+        - An intermediate representation
+        - A symbol table
+            - A dictionary of the address and the name of each label definition
+            - If you are using Racket, you can use a hash map for this part `(make-hash (...))`
+            - Hash maps can also be used in C++
+- Code generation / Synthesis (Second Pass):
+    - Matching each instruction in intermediate representation with the symbol table
+    - Output:
+        - Convert intermediate representation into machine code
+        
+What we will have to do in the compiler?
+- Encoding a `.word` <label> instruction
+- Encoding a beq instruction 
+- etc..
+- Error Checking (Pass 1)
+    - Syntax errors
+    - Duplicate errors
+    - Should never crash!
+    - Should handle every possible exception!
+
+
+> Also check the website for a bunch of examples how to do a lot of operations
     
 
